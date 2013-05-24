@@ -1,8 +1,9 @@
 <?php
 class ArtistsFromPageModel extends BasePackage {
 // version 1
-    public function __construct($env) {
+    public function __construct($env, $dbh) {
         $this->env = $env;
+        $this->db_handler = $dbh;
         $this->include_packages(array('file'));
     }
 
@@ -21,6 +22,10 @@ class ArtistsFromPageModel extends BasePackage {
             }
         }
         return $artists;
+    }
+    
+    public function artist_exists($artist) {
+        return $this->db_handler->run_db_call("ArtistGatherer", "artist_exists", $artist);
     }
 }
 

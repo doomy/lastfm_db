@@ -77,7 +77,11 @@ class dbHandler {
         include_once($this->env->basedir . "db_calls/$package.php");
         $package_class = $package."_db_calls";
         $package = new $package_class();
-        return $package->$db_call_name($this);
+        $arg_list = func_get_args();
+        array_shift($arg_list);
+        array_shift($arg_list);
+        array_unshift($arg_list, $this);
+        return call_user_func_array(array($package, $db_call_name), $arg_list);
     }
     
     function _fetch_array($result) {
