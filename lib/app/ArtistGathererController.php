@@ -15,7 +15,10 @@ class ArtistGathererController extends BasePackage {
             if ($this->ArtistsFromPageModel->artist_exists($artist_name)) {
                 $this->log->log("$artist_name already exists in the DB.");
             }
-            else $this->log->log("$artist_name does not exist in the DB.");
+            else {
+                $this->log->log("$artist_name does not exist in the DB. Inserting...");
+                $this->ArtistsFromPageModel->insert_artist($artist_name);
+            }
         }
    }
 }
