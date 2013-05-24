@@ -14,10 +14,9 @@ class ArtistGathererController extends BasePackage {
         $regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
         if(preg_match_all("/$regexp/siU", $content, $matches)) {
             foreach ($matches[2] as $match) {
-                if(strpos($match, 'music/') > 0)
-                    $this->log->log($match);
-                // $matches[2] = array of link addresses
-                //$matches[3] = array of link text - including HTML code
+                $music_pos = strpos($match, 'music/');
+                if( $music_pos > 0 )
+                    $this->log->log(substr($match, $music_pos+6));
             }
         }
     }
