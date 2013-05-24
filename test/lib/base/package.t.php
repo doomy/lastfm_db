@@ -8,7 +8,7 @@ include_once ($env->basedir . 'lib/base/package.php');
 
 class UnitTest_BasePackage extends UnitTestBase {
      public function test_construct() {
-         return ($basePackage = new BasePackage);
+         return ($basePackage = new BasePackage('mock_env'));
      }
 }
 
