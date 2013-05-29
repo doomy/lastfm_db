@@ -22,6 +22,7 @@ class ArtistGathererController extends BasePackage {
             }
         }
         $this->log->log("Inserted $count new artists.");
+        $this->log->log("Currently there is an amount of " . $this->ArtistsFromPageModel->artist_count() . " artist records in the database.");
    }
 }
 ?>

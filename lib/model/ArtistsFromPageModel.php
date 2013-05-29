@@ -42,6 +42,10 @@ class ArtistsFromPageModel extends BasePackage {
     public function random_artist() {
         return $this->db_handler->run_db_call("ArtistGatherer", "random_artist");
     }
+    
+    public function artist_count() {
+        return $this->db_handler->run_db_call("ArtistGatherer", "artist_count");
+    }
 }
 
 ?>
