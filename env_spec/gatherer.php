@@ -1,3 +1,3 @@
 <?php
-    $ENV_VARS["gatherer_start_page"] = 'http://www.last.fm/user/aleinad999/charts?rangetype=year&subtype=artists';
+    $ENV_VARS["gatherer_start_page"] = 'http://www.last.fm/user/BreakfastPills/charts?rangetype=week&subtype=artists';
 ?>

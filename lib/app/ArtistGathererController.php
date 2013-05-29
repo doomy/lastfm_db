@@ -10,16 +10,18 @@ class ArtistGathererController extends BasePackage {
     }
 
     public function run() {
+        $count = 0;
         foreach ($this->ArtistsFromPageModel->get_artist_names() as $artist_name)
         {
-            if ($this->ArtistsFromPageModel->artist_exists($artist_name)) {
-                $this->log->log("$artist_name already exists in the DB.");
-            }
-            else {
-                $this->log->log("$artist_name does not exist in the DB. Inserting...");
+
+            if (!$this->ArtistsFromPageModel->artist_exists($artist_name)) {
+
+                $this->log->log("Inserting $artist_name into the DB...");
                 $this->ArtistsFromPageModel->insert_artist($artist_name);
+                $count++;
             }
         }
+        $this->log->log("Inserted $count new artists.");
    }
 }
 ?>

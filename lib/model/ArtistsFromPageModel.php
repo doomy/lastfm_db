@@ -14,10 +14,17 @@ class ArtistsFromPageModel extends BasePackage {
         $regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
         $artists = array();
         if(preg_match_all("/$regexp/siU", $content, $matches)) {
-            foreach ($matches[2] as $match) {
-                $music_pos = strpos($match, 'music/');
-                if( $music_pos > 0 ) {
-                    $artists[] = substr($match, $music_pos+6);
+            foreach ($matches[2] as $artist_name) {
+                $music_pos = strpos($artist_name, 'music/');
+                if ( $music_pos > 0 ) {
+                        $artist_name = substr($artist_name, $music_pos+6);
+
+                    $qmark_pos = strpos($artist_name, '?');
+                    if ( $qmark_pos > 1 )
+                        $artist_name = substr($artist_name, 0, $qmark_pos);
+
+
+                    $artists[] = $artist_name;
                 }
             }
         }
