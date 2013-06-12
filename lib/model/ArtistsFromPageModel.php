@@ -24,7 +24,8 @@ class ArtistsFromPageModel extends BasePackage {
                         $artist_name = substr($artist_name, 0, $qmark_pos);
                         $artist_name = str_replace('&amp;', '&', $artist_name);
                         if (strpos($artist_name, '&rangetype=')) continue;
-                        if (strpos(strtolower($artist_name), ' feat. ')) continue;
+                        if (strpos(strtolower($artist_name), '+feat.+')) continue;
+                        if (strpos(strtolower($artist_name), '+ft.+')) continue;
 
                     $artists[] = $artist_name;
                 }
