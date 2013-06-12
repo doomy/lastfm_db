@@ -22,7 +22,9 @@ class ArtistsFromPageModel extends BasePackage {
                     $qmark_pos = strpos($artist_name, '?');
                     if ( $qmark_pos > 1 )
                         $artist_name = substr($artist_name, 0, $qmark_pos);
-
+                        $artist_name = str_replace('&amp;', '&', $artist_name);
+                        if (strpos($artist_name, '&rangetype=')) continue;
+                        if (strpos(strtolower($artist_name), ' feat. ')) continue;
 
                     $artists[] = $artist_name;
                 }
