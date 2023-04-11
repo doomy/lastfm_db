@@ -1,0 +1,1 @@
+ALTER TABLE t_artist_names ADD rating BIGINT NOT NULL DEFAULT 100;

@@ -1,1 +1,1 @@
-../../php/php.exe index.php
+..\..\php\php.exe index.php gather

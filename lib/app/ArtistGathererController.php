@@ -3,7 +3,7 @@ class ArtistGathererController extends BasePackage {
 // version 4
     public function __construct($env) {
         $this->env = $env;
-        $this->include_packages(array('log', 'model/ArtistsFromPageModel', 'db_handler'));
+        $this->include_packages(array('log', 'model/ArtistsFromPageModel'));
         $this->dbh = new dbHandler($env);
         $this->ArtistsFromPageModel = new ArtistsFromPageModel($this->env, $this->dbh);
         $this->log = new Log('artist_gatherer', $this->env, array('stdout', 'filesystem'));
@@ -20,8 +20,14 @@ class ArtistGathererController extends BasePackage {
                 $this->ArtistsFromPageModel->insert_artist($artist_name);
                 $count++;
             }
+            else {
+                // $this->log->log("$artist_name already exists");
+            }
         }
         $this->log->log("Inserted $count new artists.");
+        $this->log->log(
+            sprintf("Inserted %d new usernames.", $this->ArtistsFromPageModel->getInsertedUsernamesCount())
+        );
         $this->log->log("Currently there is an amount of " . $this->ArtistsFromPageModel->artist_count() . " artist records in the database.");
    }
 }

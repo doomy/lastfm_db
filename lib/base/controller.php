@@ -6,8 +6,7 @@ class BaseController extends BasePackage {
 
     public function __construct($env)  {
         $this->env = $env;
-        include($this->env->basedir . 'lib/db_handler.php');
-        $this->dbh = new dbHandler($this->env);
+        $this->dbh = Environment::get_dbh();
     }
 }
 

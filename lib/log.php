@@ -1,10 +1,10 @@
 <?php
+
 class Log extends BasePackage {
 // version 4
     public function __construct($name, $env, $modes = array('filesystem')) {
         $this->modes = $modes;
         $this->env = $env;
-        $this->include_packages(array('file'));
         $this->name = $name;
         $this->file = new File($this->env->basedir."log/$name.log");
     }

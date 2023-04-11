@@ -1,2 +1,6 @@
 log/*.*
 env_spec/gatherer.php
+.idea/
+php_errors.log
+config/
+sql.txt
