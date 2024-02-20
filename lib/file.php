@@ -4,7 +4,7 @@ class File {
 // version 5
 // required: PHP8+
 
-    public function __construct(private string $name) {
+    public function __construct(private string $name, private CurlFetcher $curlFetcher) {
     }
 
     public function set_name(string $name): void
@@ -24,7 +24,8 @@ class File {
     
     public function get_contents(): string
     {
-        return file_get_contents($this->name);
+        return $this->curlFetcher->readUrl($this->name);
+        //return file_get_contents($this->name);
     }
 
     /**

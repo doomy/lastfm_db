@@ -1,7 +1,7 @@
 <?php
 class ArtistsFromPageModel extends BasePackage {
 
-  //  const USERNAME_LIMIT = 50;
+    const USERNAME_LIMIT = 1;
     private $domDocument;
     private $xPath;
 
@@ -12,7 +12,7 @@ class ArtistsFromPageModel extends BasePackage {
 
 
 // version 2
-    public function __construct($env, $dbh) {
+    public function __construct($env, $dbh, private CurlFetcher $curlFetcher, private ApiClient $apiClient) {
         $this->env = $env;
         $this->db_handler = $dbh;
         $this->include_packages(array('file'));
@@ -28,19 +28,22 @@ class ArtistsFromPageModel extends BasePackage {
             "ArtistGatherer", "getUnprocessedUsernamesCount"
         );
         echo "\nUsers remaining to process: $usernamesLeftCount \n";
-        $limit = (int) ((int) $usernamesLeftCount / 10000);
         $usernames = $this->db_handler->run_db_call(
-            "ArtistGatherer", "fetchUnprocessedUsernames", $limit
+            "ArtistGatherer", "fetchUnprocessedUsernames", self::USERNAME_LIMIT
         );
+        $userNameCount = count($usernames);
 
-        echo "\n" . count($usernames) . " usernames will be processed. \n";
+        echo "\n" . $userNameCount . " usernames will be processed. \n";
         echo "1. Usernames to be processed: " . implode(", ", $usernames) . "\n";
         usleep(2000000);
 
+        $cursor = 0;
         foreach ($usernames as $username) {
-            $this->importPeers($username);
+            $cursor++;
+            echo "1.3 Processing user $cursor out of $userNameCount \n";
+             $this->importPeers($username);
             echo "1.3 Importing artists: \n";
-            $artists = array_merge($artists, $this->getArtistsFromUsername($username));
+            $artists = array_merge($artists, $this->apiClient->getArtists($username));
             echo "1.3.1 " . count($artists) . " artists found for user $username. \n";
             echo "1.4 Setting username: $username as processed. \n";
             $this->db_handler->run_db_call(
@@ -49,38 +52,16 @@ class ArtistsFromPageModel extends BasePackage {
         }
 
         return array_unique($artists);
-
-
-        /*
-        $group = $this->env->CONFIG["GROUP"];
-        $maxMemberspageId = $this->get_group_max_memberspage($group);
-        for ($membersPage=1; $membersPage <= $maxMemberspageId; $membersPage++) {
-            $url = "http://www.last.fm/group/$group/members?memberspage=$membersPage";
-//            $url = $this->env->CONFIG["memberspage_url"];
-            $periods = array("ALL", "LAST_365_DAYS", "LAST_180_DAYS", "LAST_90_DAYS", "LAST_30_DAYS", "LAST_7_DAYS");
-            $nicks = $this->get_user_names_from_file($url);
-
-            foreach($nicks as $nick) {
-               // $nick = $this->env->CONFIG["gatherer_nick"];
-
-                foreach ($periods as $period) {
-                    $artists = array_merge($artists, $this->get_artist_names_from_file("http://www.last.fm/user/$nick/library/artists?date_preset=$period"));
-                    //$artists = array_merge($artists, $this->get_artist_names_from_file("http://www.last
-                    //.fm/user/$nick/charts?rangetype=$period&subtype=artists"));
-                }
-            }
-        }*/
-
-
-
-        // return $artists;
     }
     
     private function get_artist_names_from_file($filename) {
         echo "filename: $filename \n";  
-        $start_page = new File($filename);
-        // $start_page->set_name($filename);
-        $content = $start_page->get_contents();
+        $start_page = new File($filename, $this->curlFetcher);
+        //$content = $start_page->get_contents();
+        $content = file_get_contents($filename);
+        var_dump($content);
+        die;
+
         $regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
         $artists = array();
         if(preg_match_all("/$regexp/siU", $content, $matches)) {
@@ -113,7 +94,7 @@ class ArtistsFromPageModel extends BasePackage {
 
     private function get_user_names_from_file($filename) {
         echo "filename: $filename \n";
-        $start_page = new File($this->env);
+        $start_page = new File($this->env, $this->curlFetcher);
         $start_page->set_name($filename);
         $content = $start_page->get_contents();
         $regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
@@ -181,7 +162,7 @@ class ArtistsFromPageModel extends BasePackage {
     public function get_group_max_memberspage($group) {
         $filename = "http://www.last.fm/group/$group/members";
         echo "filename: $filename \n";
-        $start_page = new File($this->env);
+        $start_page = new File($this->env, $this->curlFetcher);
         $start_page->set_name($filename);
         $content = $start_page->get_contents();
         $regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
@@ -238,7 +219,7 @@ class ArtistsFromPageModel extends BasePackage {
     private function findLastPageNumber($baseUrl) {
         $lastPage = 0;
 
-        $links = $this->getAllLinks(file_get_contents($baseUrl));
+        $links = $this->getAllLinks($this->curlFetcher->readUrl($baseUrl));
 
         foreach ($links as $link) {
             $parts = explode("page=", $link);
@@ -269,7 +250,7 @@ class ArtistsFromPageModel extends BasePackage {
     private function getUserNamesFromFile($url, $originalUser): ?array
     {
         $usernames = [];
-        $links = $this->getAllLinks(file_get_contents($url));
+        $links = $this->getAllLinks($this->curlFetcher->readUrl($url));
 
         foreach ($links as $link) {
             $parts = explode("user/", $link);
@@ -291,15 +272,6 @@ class ArtistsFromPageModel extends BasePackage {
         );
         echo "1.2.1 Inserted $insertedCount new usernames. \n";
         $this->insertedUsernamesCount += $insertedCount;
-    }
-
-    private function getArtistsFromUsername($username) {
-        $artists = [];
-        $periods = array("ALL", "LAST_365_DAYS", "LAST_180_DAYS", "LAST_90_DAYS", "LAST_30_DAYS", "LAST_7_DAYS");
-        foreach ($periods as $period) {
-            $artists = array_merge($artists, $this->get_artist_names_from_file("http://www.last.fm/user/$username/library/artists?date_preset=$period"));
-        }
-        return $artists;
     }
 }
 

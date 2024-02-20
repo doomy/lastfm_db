@@ -2,11 +2,11 @@
 
 class Log extends BasePackage {
 // version 4
-    public function __construct($name, $env, $modes = array('filesystem')) {
+    public function __construct($name, $env, $modes = array('filesystem'), CurlFetcher $curlFetcher) {
         $this->modes = $modes;
         $this->env = $env;
         $this->name = $name;
-        $this->file = new File($this->env->basedir."log/$name.log");
+        $this->file = new File($this->env->basedir."log/$name.log", $curlFetcher);
     }
 
     public function log($text) {

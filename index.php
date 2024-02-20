@@ -33,7 +33,9 @@
         
         case 'gather':
             include_once("lib/app/ArtistGathererController.php");
-            $artist_gatherer_controller = new ArtistGathererController($env);
+            include_once("lib/service/CurlFetcher.php");
+            include_once("lib/service/ApiClient.php");
+            $artist_gatherer_controller = new ArtistGathererController($env, new CurlFetcher(), new ApiClient());
             $artist_gatherer_controller->run();
         break;
     }
