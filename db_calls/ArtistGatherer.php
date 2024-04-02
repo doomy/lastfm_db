@@ -1,8 +1,7 @@
 <?php
 
-use Base\Model;
-
-class ArtistGatherer_db_calls extends Model {
+include_once(__DIR__ . "/../lib/DbCall.php");
+class ArtistGatherer_db_calls extends DbCall {
 // version 2
 
     public function artist_exists($artist_name) {

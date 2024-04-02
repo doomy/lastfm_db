@@ -1,10 +1,9 @@
 <?php
-class ArtistGathererController extends BasePackage {
+final class ArtistGathererController extends BasePackage {
 // version 4
-    public function __construct($env, CurlFetcher $curlFetcher, ApiClient $apiClient) {
+    public function __construct($env, CurlFetcher $curlFetcher, ApiClient $apiClient, private readonly DbHandler $dbh) {
         $this->env = $env;
         $this->include_packages(array('log', 'model/ArtistsFromPageModel'));
-        $this->dbh = new dbHandler($env);
         $this->ArtistsFromPageModel = new ArtistsFromPageModel($this->env, $this->dbh, $curlFetcher, $apiClient);
         $this->log = new Log('artist_gatherer', $this->env, array('stdout', 'filesystem'), $curlFetcher);
     }

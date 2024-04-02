@@ -1,4 +1,12 @@
 <?php
+    include_once("lib/service/CurlFetcher.php");
+    include_once("lib/Env.php");
+    include_once("lib/DbHandler.php");
+
+    $curlFetcher = new CurlFetcher();
+
+    $env = new Env('', $curlFetcher);
+    $dbh = new DbHandler($env, $curlFetcher);
 
         // version 1
     set_time_limit(0);
@@ -10,10 +18,6 @@
     elseif (isset($argv))
         $action = $argv[1];
     else $action = 'random';
-    
-    
-    $dbh = new DbHandler();
-    $env = Environment::get_env();
 
     switch ($action) {
         case 'rate':
@@ -28,21 +32,22 @@
         break;
         
         case 'random':
-            random($env);
+            include_once(__DIR__ . "/lib/service/ApiClient.php");
+            $apiClient = new ApiClient();
+            random($env, $dbh, $curlFetcher, $apiClient);
         break;
         
         case 'gather':
             include_once("lib/app/ArtistGathererController.php");
-            include_once("lib/service/CurlFetcher.php");
             include_once("lib/service/ApiClient.php");
-            $artist_gatherer_controller = new ArtistGathererController($env, new CurlFetcher(), new ApiClient());
+            $artist_gatherer_controller = new ArtistGathererController($env, $curlFetcher, new ApiClient(), $dbh);
             $artist_gatherer_controller->run();
         break;
     }
     
-    function random($env) {
+    function random($env, DbHandler $dbHandler, CurlFetcher $curlFetcher, ApiClient $apiClient) {
         include_once("lib/app/RandomArtistController.php");
-        $random_artist_controller = new RandomArtistController($env);
+        $random_artist_controller = new RandomArtistController($env, $dbHandler, $curlFetcher, $apiClient);
         $random_artist_controller->run();
     }
 ?>

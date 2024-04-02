@@ -1,11 +1,20 @@
 
 <?php
-class RandomArtistController extends BaseController {
+final class RandomArtistController extends BaseController {
 // version 1
+    public function __construct(
+        $env,
+        DbHandler $dbh,
+        private readonly CurlFetcher $curlFetcher,
+        private readonly ApiClient $apiClient
+    )
+    {
+        parent::__construct($env, $dbh);
+    }
 
     public function run() {
         $this->include_packages(array('model/ArtistsFromPageModel'));
-        $ArtistsFromPageModel = new ArtistsFromPageModel($this->env, $this->dbh);
+        $ArtistsFromPageModel = new ArtistsFromPageModel($this->env, $this->dbh, $this->curlFetcher, $this->apiClient);
         $random_artist = $ArtistsFromPageModel->random_artist();
         $url = 'http://last.fm/music/'.$random_artist->name;
         if($random_artist->rating < 10) $add_color = 'color: red;';
