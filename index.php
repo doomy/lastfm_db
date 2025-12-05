@@ -21,9 +21,10 @@
 
     switch ($action) {
         case 'rate':
-            if ($dbh->run_db_call('ArtistGatherer', 'change_rating', $_GET['id'], $_GET['factor']))
-                echo $_GET['id'] . ' succesfully rated: ' . $_GET['factor'] . "<p></p>";
-            header("Location: ?action=random");
+            if ($dbh->run_db_call('ArtistGatherer', 'change_rating', $_GET['id'], $_GET['factor'])) {
+                //echo $_GET['id'] . ' succesfully rated: ' . $_GET['factor'] . "<p></p>";
+                header("Location: ?action=random");
+            }
         break;
         case 'kickstart':
             if ($dbh->run_db_call('ArtistGatherer', 'kickstart', $_GET['id']))
@@ -50,4 +51,3 @@
         $random_artist_controller = new RandomArtistController($env, $dbHandler, $curlFetcher, $apiClient);
         $random_artist_controller->run();
     }
-?>

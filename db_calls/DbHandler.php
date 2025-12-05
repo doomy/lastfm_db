@@ -14,5 +14,3 @@ class DbHandler_db_calls extends DbCall  {
     }
 
 }
-
-?>

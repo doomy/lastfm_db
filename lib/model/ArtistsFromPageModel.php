@@ -1,7 +1,7 @@
 <?php
 class ArtistsFromPageModel extends BasePackage {
 
-    const USERNAME_LIMIT = 1;
+    const USERNAME_LIMIT = 5;
     private $domDocument;
     private $xPath;
 

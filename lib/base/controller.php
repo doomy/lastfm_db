@@ -8,5 +8,3 @@ class BaseController extends BasePackage {
         $this->env = $env;
     }
 }
-
-?>

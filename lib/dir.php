@@ -144,4 +144,3 @@ class Dir {
         return $filelist;
     }
 }
-?>

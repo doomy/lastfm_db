@@ -37,4 +37,3 @@ class Env {
         @$this->CONFIG = $CONFIG;
     }
 }
-?>

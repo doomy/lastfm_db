@@ -127,4 +127,3 @@ final class DbHandler {
         return $this->env->CONFIG['DB_PORT'] ?? ini_get("mysqli.default_port");
     }
 }
-?>
