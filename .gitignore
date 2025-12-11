@@ -4,3 +4,4 @@ env_spec/gatherer.php
 php_errors.log
 config/
 sql.txt
+.env
