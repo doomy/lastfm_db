@@ -1,0 +1,5 @@
+.git
+.idea
+log
+php_errors.log
+.env
