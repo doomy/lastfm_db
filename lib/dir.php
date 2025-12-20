@@ -2,7 +2,7 @@
 class Dir {
     # version 17
 
-    public function __construct($env, private CurlFetcher $curlFetcher) {
+    public function __construct(private Env $env, private CurlFetcher $curlFetcher) {
         $this->env = $env;
     }
 
@@ -83,7 +83,7 @@ class Dir {
     }
     
     public function put_contents_into_file($file_name, $contents) {
-        include_once($this->env->basedir . 'lib/file.php');
+        include_once($this->env->getBasedir() . 'lib/file.php');
         $file = new File($file_name, $this->curlFetcher);
         $file->put_contents($contents);
     }

@@ -1,8 +1,13 @@
 <?php
 
-class Env {
+final readonly class Env {
+    private string $basedir;
 
-    # 29/12/14
+
+    /**
+     * @var array<string, int|string>
+     */
+    private array $config;
 
     public function __construct($basedir, private readonly CurlFetcher $curlFetcher) {
         $this->basedir = $basedir;
@@ -34,6 +39,17 @@ class Env {
         foreach ($files as $file) {
             include($this->basedir . 'config/'.$file);
         }
-        @$this->CONFIG = $CONFIG;
+        assert(isset($CONFIG) && is_array($CONFIG));
+        $this->config = $CONFIG;
+    }
+
+    public function getBasedir(): string
+    {
+        return $this->basedir;
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }
