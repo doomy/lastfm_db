@@ -12,7 +12,7 @@ final class DbHandler {
         $this->mysqli = $this->get_mysqli_connection();
         $this->mysqli->set_charset('utf8');
 
-        if ($this->env->CONFIG['DB_CREATE']) {
+        if ($this->env->getConfig()['DB_CREATE']) {
             $this->_create_db();
         }
         $this->_manage_upgrades();
@@ -46,7 +46,7 @@ final class DbHandler {
     }
     
     private function _create_db() {
-        $this->process_sql_file($this->env->basedir.'sql/base.sql');
+        $this->process_sql_file($this->env->getBasedir().'sql/base.sql');
     }
 
     private function _manage_upgrades() {
@@ -83,7 +83,7 @@ final class DbHandler {
 
     private function _upgrade_to_version($upgrade_id, $upgrade_file) {
         $this->process_sql_file(
-            $this->env->basedir . 'sql/upgrade/' . $upgrade_file
+            $this->env->getBasedir() . 'sql/upgrade/' . $upgrade_file
         );
         if (!($this->_get_db_error())) $this->_update_upgrade_version($upgrade_id);
         else die($this->_get_db_error());
@@ -98,7 +98,7 @@ final class DbHandler {
     private function _get_upgrade_files() {
         $dir_handler = new Dir($this->env, $this->curlFetcher);
         return $dir_handler->get_files_from_dir_by_extension(
-             $this->env->basedir.'sql/upgrade', 'sql'
+             $this->env->getBasedir().'sql/upgrade', 'sql'
         );
     }
 
@@ -112,10 +112,10 @@ final class DbHandler {
         else {
 
             $this->mysqli = new mysqli(
-                $this->env->CONFIG['DB_HOST'],
-                $this->env->CONFIG['DB_USER'],
-                $this->env->CONFIG['DB_PASS'],
-                $this->env->CONFIG['DB_NAME'],
+                $this->env->getConfig()['DB_HOST'],
+                $this->env->getConfig()['DB_USER'],
+                $this->env->getConfig()['DB_PASS'],
+                $this->env->getConfig()['DB_NAME'],
                 $this->getPort()
             );
         }
@@ -124,6 +124,6 @@ final class DbHandler {
 
     private function getPort(): int
     {
-        return $this->env->CONFIG['DB_PORT'] ?? ini_get("mysqli.default_port");
+        return $this->env->getConfig()['DB_PORT'] ?? ini_get("mysqli.default_port");
     }
 }

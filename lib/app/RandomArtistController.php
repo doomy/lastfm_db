@@ -3,7 +3,7 @@
 final class RandomArtistController extends BaseController {
 // version 1
     public function __construct(
-        $env,
+        Env $env,
         DbHandler $dbh,
         private readonly CurlFetcher $curlFetcher,
         private readonly ApiClient $apiClient

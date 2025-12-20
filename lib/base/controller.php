@@ -1,10 +1,9 @@
 <?php
 include 'package.php';
 
-class BaseController extends BasePackage {
+abstract class BaseController extends BasePackage {
 // version 1
 
-    public function __construct($env, protected readonly DbHandler $dbh)  {
-        $this->env = $env;
+    public function __construct(protected Env $env, protected readonly DbHandler $dbh)  {
     }
 }

@@ -12,9 +12,8 @@ class ArtistsFromPageModel extends BasePackage {
 
 
 // version 2
-    public function __construct($env, $dbh, private CurlFetcher $curlFetcher, private ApiClient $apiClient) {
+    public function __construct($env, private DbHandler $dbHandler, private CurlFetcher $curlFetcher, private ApiClient $apiClient) {
         $this->env = $env;
-        $this->db_handler = $dbh;
         $this->include_packages(array('file'));
         $this->domDocument = new DOMDocument();
         $this->xPath = new \DOMXPath($this->domDocument);
@@ -24,11 +23,11 @@ class ArtistsFromPageModel extends BasePackage {
 
         $artists = array();
 
-        $usernamesLeftCount = $this->db_handler->run_db_call(
+        $usernamesLeftCount = $this->dbHandler->run_db_call(
             "ArtistGatherer", "getUnprocessedUsernamesCount"
         );
         echo "\nUsers remaining to process: $usernamesLeftCount \n";
-        $usernames = $this->db_handler->run_db_call(
+        $usernames = $this->dbHandler->run_db_call(
             "ArtistGatherer", "fetchUnprocessedUsernames", self::USERNAME_LIMIT
         );
         $userNameCount = count($usernames);
@@ -46,7 +45,7 @@ class ArtistsFromPageModel extends BasePackage {
             $artists = array_merge($artists, $this->apiClient->getArtists($username));
             echo "1.3.1 " . count($artists) . " artists found for user $username. \n";
             echo "1.4 Setting username: $username as processed. \n";
-            $this->db_handler->run_db_call(
+            $this->dbHandler->run_db_call(
                 "ArtistGatherer", "markUsernameAsProcessed", $username
             );
         }
@@ -121,21 +120,21 @@ class ArtistsFromPageModel extends BasePackage {
     }
     
     public function artist_exists($artist) {
-        return $this->db_handler->run_db_call("ArtistGatherer", "artist_exists", $artist);
+        return $this->dbHandler->run_db_call("ArtistGatherer", "artist_exists", $artist);
     }
     
     public function insert_artist($artist) {
-        $this->db_handler->run_db_call("ArtistGatherer", "insert_artist", $artist);
+        $this->dbHandler->run_db_call("ArtistGatherer", "insert_artist", $artist);
     }
     
     public function random_artist() {
     
         //do {
-            $max_rating = $this->db_handler->run_db_call("ArtistGatherer", "max_rating");
+            $max_rating = $this->dbHandler->run_db_call("ArtistGatherer", "max_rating");
             $minRating = rand(1, $max_rating);
             echo "minimum rating: $minRating <br/>";
 
-            $random_artist = $this->db_handler->run_db_call("ArtistGatherer", "random_artist", $minRating);
+            $random_artist = $this->dbHandler->run_db_call("ArtistGatherer", "random_artist", $minRating);
             echo "artist rating: {$random_artist->rating} <br />";
 
 
@@ -156,7 +155,7 @@ class ArtistsFromPageModel extends BasePackage {
     }
     
     public function artist_count() {
-        return $this->db_handler->run_db_call("ArtistGatherer", "artist_count");
+        return $this->dbHandler->run_db_call("ArtistGatherer", "artist_count");
     }
 
     public function get_group_max_memberspage($group) {
@@ -267,7 +266,7 @@ class ArtistsFromPageModel extends BasePackage {
         echo "1.1 Processing username: $username \n";
         $peers = $this->getPeers($username);
         echo "1.2 Inserting new usernames: \n";
-        $insertedCount = $this->db_handler->run_db_call(
+        $insertedCount = $this->dbHandler->run_db_call(
             "ArtistGatherer", "insertUsernames", $peers
         );
         echo "1.2.1 Inserted $insertedCount new usernames. \n";
