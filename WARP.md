@@ -26,18 +26,6 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - `index.php` is the single HTTP entrypoint and uses `$_GET['action']` to select behavior (e.g. `?action=random`, `?action=gather`, `?action=rate`).
 - For a typical web setup, this repo is expected to live under a web root alongside a sibling `central` directory that contains shared libraries and `lib/autoloader.php`; see the Architecture section for details.
 
-### Run all tests
-- Custom test harness entrypoint:
-  - From the repo root: `php test/index.php`
-- `test/index.php` constructs an `Env` rooted at `../` and uses `lib/test/tester.php` to discover and run all test files under `test/`.
-- Current tests are mostly lightweight unit tests of filesystem and environment helpers; some may write temporary files under the repo but should clean up after themselves.
-
-### Run a single test file
-- There is no dedicated CLI for an individual test; tests are discovered by `Tester::run_all_tests()` and each `*.t.php` file under `test/lib/**` is self-contained.
-- To run just one test from the CLI, a simple workflow is:
-  - Temporarily edit `test/index.php` to call `$tester->run_testfile('<relative-path-under-test/>');` instead of `run_all_tests()` (see `lib/test/tester.php` for the expected relative path format).
-  - Run `php test/index.php`.
-  - Revert the change when done.
 
 ### Quick syntax check
 - There is no configured linter in this repo. For a quick syntax check on a single PHP file you can use:
@@ -61,8 +49,8 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - `lib/Env.php` is the core environment object. It:
   - is constructed with a `basedir` (e.g. `''`, `'../'`, `'../../'`),
   - scans the `config/` directory for `*.php` files using `Dir::get_files_from_dir_by_extension`,
-  - includes each config file, accumulating settings into the global `$CONFIG` array,
-  - exposes them via `$env->CONFIG`.
+  - includes each config file, accumulating settings into an internal config array populated from the global `$CONFIG` in each config file,
+  - exposes paths and settings via `getBasedir()` and `getConfig()`.
 - Key config files:
   - `config/db.php` — database host, user, password, db name, port, and `DB_CREATE` flag.
   - `config/gatherer.php` — Last.fm group name used by the gatherer.
@@ -73,7 +61,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ### Database layer
 - `lib/DbHandler.php` is the main DB gateway and encapsulates a `mysqli` connection:
-  - Connects using credentials from `$env->CONFIG`.
+  - Connects using credentials from the config array returned by `$env->getConfig()`.
   - Sets the connection charset to UTF-8.
   - If `DB_CREATE` is enabled, runs `sql/base.sql` once to initialize the schema.
   - On every construction, it calls `_manage_upgrades()` which:
@@ -93,9 +81,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 #### Base infrastructure
 - `lib/base/package.php` defines `BasePackage`:
-  - stores `$env` provided at construction,
-  - exposes `include_packages(array $packages)` to include library modules relative to `$env->basedir.'lib/'` (e.g. `'file'`, `'model/ArtistsFromPageModel'`).
-- `lib/base/controller.php` defines `BaseController` which extends `BasePackage` and adds a typed `DbHandler` property; all HTTP/CLI controllers extend this.
+  - stores a typed `Env` instance provided at construction,
+  - exposes `include_packages(array $packages)` to include library modules relative to `$env->getBasedir().'lib/'` (e.g. `'file'`, `'model/ArtistsFromPageModel'`).
+- `lib/base/controller.php` defines `BaseController` which extends `BasePackage`, stores a typed `DbHandler`, and is the base for all HTTP/CLI controllers.
 
 #### Services
 - `lib/service/CurlFetcher.php` encapsulates raw HTTP GETs using cURL:
@@ -150,22 +138,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
     - `gather` — constructs `ArtistGathererController` and runs it to crawl users and insert artists.
 
 ### Testing
-- Micro test framework lives under `lib/test/`:
-  - `unit_test_base.php` defines `UnitTestBase` with a basic `init()` hook and a `UnitTestRunner` that reflects over `test_*` methods and treats a `false` return value as a failure.
-  - `tester.php` defines `Tester`, which:
-    - uses `Dir` to collect all test files under the `test/` tree,
-    - switches the working directory appropriately,
-    - includes each test file and lets it run its own `UnitTestRunner`.
-- The main test entrypoint is `test/index.php`, which:
-  - constructs an `Env` and `Dir` rooted at `../`,
-  - constructs a `Tester`,
-  - calls `$tester->run_all_tests()`.
-- Individual tests follow a consistent pattern (see `test/lib/dir.t.php`, `test/lib/file.t.php`, `test/lib/log.t.php`, `test/lib/db_handler.t.php`):
-  - set a `$BASE_PATH` and construct an `Env`,
-  - include `lib/test/unit_test_base.php` and the class under test,
-  - define a `UnitTest_*` class with `test_*` methods that return Booleans,
-  - instantiate `UnitTestRunner` at the bottom of the file and run tests against a new instance of the test class.
-- When adding new tests, create a new `*.t.php` file under `test/lib/<area>/` following this pattern; it will be picked up automatically by `Tester::run_all_tests()`.
+- There is currently no automated test runner or test suite checked into this repository.
+- Historically, a custom micro test framework lived under `test/` and `lib/test/`, with `test/index.php` as the main entrypoint and `lib/test/tester.php` / `lib/test/unit_test_base.php` providing discovery and assertion helpers.
+- If you reintroduce tests, you can mirror the previous structure by looking at the deleted files in the Git history (see commit "Delete legacy tests").
 
 ### External dependency: central library
 - Many core utilities (`Dir`, `File`, `Template`, `Log`, `DbCall`, possibly others) are expected to come from a separate `central` project referenced by `config/paths.php` and `config/shell_paths.php`.
