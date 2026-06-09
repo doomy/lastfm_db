@@ -14,3 +14,4 @@ RUN docker-php-ext-install mysqli
 
 # App will be bind-mounted in docker-compose to /var/www/html
 WORKDIR /var/www/html
+RUN ln -sfn /var/www/html/vendor/doomy/central /var/www/central

@@ -1,0 +1,23 @@
+{
+    "name": "doomy/lastfm_db",
+    "type": "project",
+    "require": {
+        "doomy/central": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "doomy/central",
+                "version": "dev-master",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/doomy/central.git",
+                    "reference": "master"
+                }
+            }
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
